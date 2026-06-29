@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Operator {
+  id          String      @id
+  name        String
+  yearsActive Int
+  rating      Float
+  contact     String
+  adventures  Adventure[]
+}
+
+model Adventure {
+  id                    String          @id
+  title                 String
+  category              String
+  difficulty            String
+  basePrice             Int
+  location              String
+  district              String
+  lat                   Float
+  lng                   Float
+  tags                  String[]
+  heroImage             String
+  gallery               String[]
+  description           String
+  shortDescription      String
+  itinerary             String[]
+  included              String[]
+  cancellationPolicy    String
+  durationHours         Int
+  travelHoursFromOrigin Json
+  originHints           String[]
+  operatorId            String
+  operator              Operator        @relation(fields: [operatorId], references: [id])
+  dates                 AdventureDate[]
+}
+
+model AdventureDate {
+  id           String    @id
+  adventureId  String
+  date         DateTime
+  slotsTotal   Int
+  slotsLeft    Int
+  version      Int       @default(0)
+  weatherRisk  String
+  demandSignal String
+  dynamicPrice Int
+  adventure    Adventure @relation(fields: [adventureId], references: [id])
+  bookings     Booking[]
+
+  @@index([adventureId, date])
+}
+
+model Booking {
+  id              String   @id
+  userId          String
+  adventureDateId String
+  slotsBooked     Int
+  totalPrice      Int
+  status          String
+  createdAt       DateTime
+  customerName    String?
+  customerEmail   String?
+  customerPhone   String?
+  dietaryPreference String?
+  specialRequests String?
+  paymentStatus   String?
+  paymentReference String?
+  adventureDate   AdventureDate @relation(fields: [adventureDateId], references: [id])
+
+  @@index([adventureDateId, status])
+}
